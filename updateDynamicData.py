@@ -6,6 +6,8 @@ from datetime import datetime, date, time
 import os
 @cli.app.CommandLineApp
 
+## sample command:
+## python3 /home/zizhan/massless/gitHub/crypto_index/updateDynamicData.py /home/zizhan/massless/data/ csv BITSTAMP_SPOT_BTC_USD 1DAY "16/01/01 00:00:00" "18/04/01 00:00:00" false 10000
 def main(app):
 	print('Running updateOHLCVHistoryData.py ...')
 

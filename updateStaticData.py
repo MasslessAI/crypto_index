@@ -4,6 +4,9 @@ import importUtilities
 import cli.app
 @cli.app.CommandLineApp
 
+## sample command:
+## python3 /home/zizhan/massless/gitHub/crypto_index/updateStaticData.py /home/zizhan/massless/data csv 
+
 def main(app):
 	print('Running updateStaticData.py ...')
 	baseUrlCfg = '%s/baseUrl.cfg' % os.path.dirname(__file__)
