@@ -3,7 +3,7 @@ from __future__ import print_function
 import argparse
 import sys
 
-from alterInfo import metadata
+from cii import metadata
 
 
 def main(argv):

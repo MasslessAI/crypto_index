@@ -9,9 +9,9 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='alterInfo',
+    name='CII',
     version='0.1.0',
-    description='Info for alternative currencies',
+    description='Crypto Index Indicator',
     long_description=long_description,
     url='massless.ai',
     author='Massless Inc.',
@@ -23,9 +23,9 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.6',
     ],
-    keywords='alternative currency information',
+    keywords='alternative crypto currency index',
     packages=find_packages(),
-    install_requires=['pandas'],
+    install_requires=['pandas', 'requests', 'numpy'],
     # extras_require={  # Optional
     #     'dev': ['check-manifest'],
     #     'test': ['coverage'],

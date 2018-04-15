@@ -1,7 +1,7 @@
-package = 'alterInfo'
-project = "AlterInfo"
+package = 'cii'
+project = "Crypto Index Indicator"
 version = '0.1.0'
-description = 'Alter Ccy Info'
+description = 'Crypto Index Indicator'
 author = ['Massless Inc.']
 emails = ['info@massless.ai']
 license = 'MIT'

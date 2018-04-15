@@ -1,4 +1,4 @@
-from alterInfo import metadata
+from cii import metadata
 
 __version__ = metadata.version
 __author__ = metadata.author
