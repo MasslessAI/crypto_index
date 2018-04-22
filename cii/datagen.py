@@ -2,12 +2,39 @@ import os
 import sys
 import requests
 import pandas as pd
-import csv
+import pickle
 
 
 def error(msg):
     print(msg)
     sys.exit(64)
+
+
+class IndexedData(object):
+    def __init__(self, source, request_dict, data):
+        self.source = source
+        self.file_name = get_req_str(source, request_dict, False)
+        self.index = request_dict
+        self.data = data
+        self.validate()
+
+    def validate(self):
+        if 'price_close' not in self.data.keys():
+            error('price_close is not in the input data.')
+        if 'price_open' not in self.data.keys():
+            error('price_open is not in the input data.')
+        if 'price_low' not in self.data.keys():
+            error('price_low is not in the input data.')
+        if 'price_high' not in self.data.keys():
+            error('price_high is not in the input data.')
+        if 'time_close' not in self.data.keys():
+            error('time_close is not in the input data.')
+        if 'time_open' not in self.data.keys():
+            error('time_open is not in the input data.')
+        if 'trades_count' not in self.data.keys():
+            error('trades_count is not in the input data.')
+        if 'volume_traded' not in self.data.keys():
+            error('volume_traded is not in the input data.')
 
 
 def data_gen(source, request, key, write_to_file=False):
@@ -23,15 +50,24 @@ def data_gen(source, request, key, write_to_file=False):
         df = pd.DataFrame()
         df = df.append(json_str, ignore_index=True)
 
+        df = convert_coinapi_data(df)
+
         for key in request:
             df[key] = request[key]
 
+        indexed_data = IndexedData(source, request, df)
         if write_to_file:
-            data_path = '../data/'
-            data_file = source + '_' + get_req_str(source, request, False) + '_data.csv'
-            df.to_csv(data_path + data_file, sep=',', encoding='utf-8')
+            data_path = '../data/csv/'
+            data_file_csv = source + '_' + get_req_str(source, request, False) + '_data.csv'
+            df.to_csv(data_path + data_file_csv, sep=',', encoding='utf-8')
 
-        return df
+            data_path = '../data/pickle/'
+            data_file_pickle = source + '_' + get_req_str(source, request, False) + '_data.pickle'
+            pickle_out = open(data_path + data_file_pickle, "wb")
+            pickle.dump(indexed_data, pickle_out)
+            pickle_out.close()
+
+        return indexed_data
     else:
         error('The source or request is not supported.')
 
@@ -70,3 +106,20 @@ def get_req_str(source, request, for_url=True):
         return request_str
     else:
         error('The source is not supported.')
+
+
+def convert_coinapi_data(data_coinapi):
+    conversion_map = {'price_close': 'price_close',
+                      'price_open': 'price_open',
+                      'price_high': 'price_high',
+                      'price_low': 'price_low',
+                      'time_close': 'time_period_end',
+                      'time_open': 'time_period_start',
+                      'trades_count': 'trades_count',
+                      'volume_traded': 'volume_traded'}
+
+    data_standard = pd.DataFrame()
+    for key in conversion_map.keys():
+        data_standard[key] = data_coinapi[conversion_map[key]]
+
+    return data_standard

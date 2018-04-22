@@ -1,0 +1,2 @@
+,price_close,price_high,price_low,price_open,time_close,time_open,time_period_end,time_period_start,trades_count,volume_traded,request_type,symbol_id,period_id,time_start,limit
+0,1173.5,1200.0,1150.0,1200.0,2017-03-17T12:09:25.0000000Z,2017-03-17T12:00:34.0000000Z,2017-03-18T00:00:00.0000000Z,2017-03-17T00:00:00.0000000Z,100,812933.0,ohlcv,BITMEX_FTS_BTC_USD_170630,1DAY,2016-01-01T00:00:00,100000

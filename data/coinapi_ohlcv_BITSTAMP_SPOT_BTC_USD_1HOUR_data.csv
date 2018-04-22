@@ -1,0 +1,2 @@
+,message,request_type,symbol_id,period_id,time_start,limit
+0,The parameter period_id is invalid.,ohlcv,BITSTAMP_SPOT_BTC_USD,1HOUR,2018-01-01T00:00:00,100000
