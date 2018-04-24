@@ -24,7 +24,7 @@ class Strategy(object):
         pass
 
     def back_testing(self, start_date=None, end_date=None, lag=3):
-        report_col = ['date', 'total', 'pnl', 'cash']
+        report_col = ['date', 'total', 'pnl', 'cash', 'set_aside']
         for asset in self.asset_model.get_targets():
             report_col.append(asset + '_holding')
             report_col.append(asset + '_price')
@@ -43,7 +43,7 @@ class Strategy(object):
             end_date = asset_prices_frame.index[-1]
 
         asset_prices = self.asset_model.get_prices(start_date)
-        report_0 = [start_date, prtf.value(asset_prices), 0, prtf.cash]
+        report_0 = [start_date, prtf.value(asset_prices), 0, prtf.cash, prtf.wife_pocket]
         for asset in self.asset_model.get_targets():
             asset_hold = 0
             if asset in prtf.asset_holdings.keys():
@@ -62,7 +62,8 @@ class Strategy(object):
                 self.apply_event_logic(time, prtf)
                 asset_prices = self.asset_model.get_prices(time)
                 report_i = [time, prtf.value(asset_prices),
-                            prtf.value(asset_prices) - report.iloc[idx-1]['total'], prtf.cash]
+                            prtf.value(asset_prices) - report.iloc[idx-1]['total'],
+                            prtf.cash, prtf.wife_pocket]
                 for asset in self.asset_model.get_targets():
                     asset_hold = 0
                     if asset in prtf.asset_holdings.keys():
@@ -91,17 +92,15 @@ class StrategyBearBull(Strategy):
             price_eth = comp_eth.get_price(time)
 
             if ind_btc == -1 and ind_eth == -1:
-                prtf.sell(btc, price_btc)
-                prtf.sell(eth, price_eth)
+                prtf.sell_unit(btc, price_btc)
+                prtf.sell_unit(eth, price_eth)
             elif ind_btc == -1 and ind_eth == 1:
                 prtf.buy(eth, price_eth)
             elif ind_btc == 1 and ind_eth == -1:
                 prtf.buy(btc, price_btc)
             elif ind_btc == 1 and ind_eth == 1:
-                qt_btc = int(prtf.cash / 4 / price_btc * 100) / 100
-                prtf.buy(btc, price_btc, qt_btc)
-                qt_eth = int(prtf.cash / 4 / price_eth * 100) / 100
-                prtf.buy(eth, price_eth, qt_eth)
+                prtf.buy(btc, price_btc, 0.25)
+                prtf.buy(eth, price_eth, 0.25)
 
         return prtf
 

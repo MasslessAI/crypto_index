@@ -12,7 +12,7 @@ def error(msg):
     sys.exit(64)
 
 
-class BearBullMarketRules(object):
+class IndicatorRules(object):
     def __init__(self, rule_dict):
         if 'method' in rule_dict.keys():
             self.method = rule_dict['method']
@@ -100,7 +100,7 @@ class AssetModelComponent(object):
                          'tolerance_up': 0.03,
                          'tolerance_down': 0.03}
 
-        bear_bull_rules = BearBullMarketRules(rule_dict)
+        ind_rules = IndicatorRules(rule_dict)
 
         series = self.price_close_series
 
@@ -109,23 +109,109 @@ class AssetModelComponent(object):
 
         series_trunc = series.truncate(after=time)
 
-        if bear_bull_rules.method == 'moving_average':
-            series_trunc = series_trunc.rolling(bear_bull_rules.window_size).mean()
+        if ind_rules.method == 'moving_average':
+            series_trunc = series_trunc.rolling(ind_rules.window_size[0]).mean()
             series_trunc = series_trunc.dropna()
 
             if len(series_trunc) < 4:
                 error('The input data is not enough for bear indicator.')
 
-            if series_trunc.iloc[-1] < (1 - bear_bull_rules.tolerance_up) * series_trunc.iloc[-2] and \
-                    series_trunc.iloc[-2] < (1 - bear_bull_rules.tolerance_up) * series_trunc.iloc[-3]:
+            if series_trunc.iloc[-1] < (1 - ind_rules.tolerance_down) * series_trunc.iloc[-2] and \
+                    series_trunc.iloc[-2] < (1 - ind_rules.tolerance_down) * series_trunc.iloc[-3]:
                 return -1
-            elif series_trunc.iloc[-1] > (1 + bear_bull_rules.tolerance_down) * series_trunc.iloc[-2] and \
-                    series_trunc.iloc[-2] > (1 + bear_bull_rules.tolerance_down) * series_trunc.iloc[-3]:
+            elif series_trunc.iloc[-1] > (1 + ind_rules.tolerance_up) * series_trunc.iloc[-2] and \
+                    series_trunc.iloc[-2] > (1 + ind_rules.tolerance_up) * series_trunc.iloc[-3]:
                 return 1
             else:
                 return 0
         else:
             error('Only moving average is implemented for bear market indicator.')
+
+    def average_compare(self, time=None, rule_dict=None):
+        if rule_dict is None:
+            rule_dict = {'method': 'moving_average',
+                         'window_size': [3, 5],
+                         'tolerance_up': 0.03,
+                         'tolerance_down': 0.03}
+
+        if len(rule_dict['window_size']) != 2:
+            error('For average comparison, two window sizes need to be provided in the rule.')
+
+        window_short = rule_dict['window_size'][0]
+        window_long = rule_dict['window_size'][1]
+
+        if window_short > window_long:
+            error('In the window_size param, short window needs to be given first.')
+
+        ind_rules = IndicatorRules(rule_dict)
+
+        series = self.price_close_series
+
+        if time is None:
+            time = series.index[-1]
+
+        series_trunc = series.truncate(after=time)
+
+        if ind_rules.method == 'moving_average':
+            series_trunc_short = series_trunc.rolling(window_short).mean()
+            series_trunc_short = series_trunc_short.dropna()
+            series_trunc_long = series_trunc.rolling(window_long).mean()
+            series_trunc_long = series_trunc_long.dropna()
+
+            if series_trunc_short.iloc[-1] > (1 + ind_rules.tolerance_up) * series_trunc_long.iloc[-1]:
+                return -1
+            elif series_trunc_short.iloc[-1] < (1 - ind_rules.tolerance_down) * series_trunc_long.iloc[-1]:
+                return 1
+            else:
+                return 0
+        else:
+            error('Only moving average is implemented for average comparison indicator.')
+
+    def double_dip(self, time=None, rule_dict=None):
+        if rule_dict is None:
+            rule_dict = {'method': 'moving_average',
+                         'window_size': [3, 20]}
+
+        if len(rule_dict['window_size']) != 2:
+            error('For double dip, two window sizes need to be provided in the rule.')
+
+        window_ma = rule_dict['window_size'][0]
+        window_dip = rule_dict['window_size'][1]
+
+        # ind_rules = IndicatorRules(rule_dict)
+        series = self.price_close_series
+
+        if time is None:
+            time = datetime.strptime(series.index[-1], '%Y-%m-%dT%H:%M:%S.%f')
+
+        if series.index[0] + timedelta(days=window_ma+window_dip) > time:
+            error('The given time is early than the series start date plus window.')
+
+        series_trunc = series.rolling(window=window_ma, center=False).mean().dropna()
+        end_date = time
+        start_date = time - timedelta(days=window_dip)
+
+        series_trunc = series_trunc.truncate(before=start_date, after=end_date)
+        y = np.array(list(series_trunc.values))
+        x = np.arange(len(y))
+        # t = np.array(list(series_trunc.index))
+        z = np.polyfit(x, y, 4)
+
+        a = 4 * z.item(0)
+        b = 3 * z.item(1)
+        c = 2 * z.item(2)
+        d = z.item(3)
+
+        ind_roots = -27 * a**2 * d**2 + 18 * a * b * c * d - 4 * a * c**3 - 4 * b**3 * d + b**2 * c**2
+
+        if z.item(0) > 0:
+            if ind_roots > 0:
+                return 1
+        else:
+            if ind_roots > 0:
+                return -1
+
+        return 0
 
 
 class AssetModel(object):
@@ -216,6 +302,8 @@ class AssetModel(object):
 
     def corr_log_return(self, target_1, target_2, period):
         log_returns = self.concat_log_return(target_1, target_2, period)
-        corr = log_returns[target_1].corr(log_returns[target_2])
+        corr = {}
+        for i in range(-5, 5):
+            corr[i] = log_returns[target_1].corr(log_returns[target_2].shift(i))
         return corr
 

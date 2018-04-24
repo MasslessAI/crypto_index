@@ -25,7 +25,7 @@ setup(
     ],
     keywords='alternative crypto currency index',
     packages=find_packages(),
-    install_requires=['pandas', 'requests', 'numpy'],
+    install_requires=['pandas', 'requests', 'numpy', 'matplotlib'],
     # extras_require={  # Optional
     #     'dev': ['check-manifest'],
     #     'test': ['coverage'],
