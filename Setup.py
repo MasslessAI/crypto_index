@@ -9,9 +9,9 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='CII',
+    name='CQT',
     version='0.1.0',
-    description='Crypto Index Indicator',
+    description='Crypto Quant Trading',
     long_description=long_description,
     url='massless.ai',
     author='Massless Inc.',
@@ -23,7 +23,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.6',
     ],
-    keywords='alternative crypto currency index',
+    keywords='alternative crypto currency index strategy trading',
     packages=find_packages(),
     install_requires=['pandas', 'requests', 'numpy', 'matplotlib'],
     # extras_require={  # Optional

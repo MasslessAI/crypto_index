@@ -1,2 +1,4 @@
 ./notebooks/.ipynb_checkpoints/*
+./cqt/__pycache__
+./.idea/*
 __pycache__

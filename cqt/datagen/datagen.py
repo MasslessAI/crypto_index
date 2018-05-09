@@ -13,7 +13,7 @@ def error(msg):
 class IndexedData(object):
     def __init__(self, source, request_dict, data):
         self.source = source
-        self.file_name = get_req_str(source, request_dict, False)
+        self.file_name = source + '_' + get_req_str(source, request_dict, False) + '_data'
         self.index = request_dict
         self.data = data
         self.validate()
@@ -113,8 +113,8 @@ def convert_coinapi_data(data_coinapi):
                       'price_open': 'price_open',
                       'price_high': 'price_high',
                       'price_low': 'price_low',
-                      'time_close': 'time_period_end',
-                      'time_open': 'time_period_start',
+                      'time_close': 'time_close',
+                      'time_open': 'time_open',
                       'trades_count': 'trades_count',
                       'volume_traded': 'volume_traded'}
 
