@@ -3,7 +3,10 @@ import sys
 import requests
 import pandas as pd
 import pickle
-
+import json
+from datetime import datetime
+from time import mktime
+from copy import deepcopy
 
 def error(msg):
     print(msg)
@@ -37,20 +40,28 @@ class IndexedData(object):
             error('volume_traded is not in the input data.')
 
 
-def data_gen(source, request, key, write_to_file=False):
-    if source == 'coinapi':
-        source_url = 'https://rest.coinapi.io/v1/'
+def data_gen(source, request, key=None, write_to_file=False):
+    
+    cfg_file = '%s/api.cfg' % (os.path.dirname(os.path.realpath(__file__)))
+    api_cfg = read_api_cfg(cfg_file)
+	
+    if source in api_cfg.keys():
+        source_url = api_cfg[source]['url']
         request_str = get_req_str(source, request)
         request_url = source_url + request_str
-        headers = {'X-CoinAPI-Key': key}
-        response = requests.get(request_url, headers=headers)
+        print(request_url)
+        if "header" in api_cfg[source].keys() and not key is None:
+            headers = {api_cfg[source]['header']: key}
+            response = requests.get(request_url, headers=headers)
+        else:
+            response = requests.get(request_url)
 
         json_str = response.json()
 
         df = pd.DataFrame()
-        df = df.append(json_str, ignore_index=True)
+        #df = df.append(json_str, ignore_index=True)
 
-        df = convert_coinapi_data(df)
+        df = covert_data(source,df,json_str)
 
         for key in request:
             df[key] = request[key]
@@ -76,38 +87,84 @@ def get_req_str(source, request, for_url=True):
     if len(request) == 0:
         error('The input request dictionary cannot be empty.')
 
+    if 'request_type' not in request:
+        error('The request dictionary must contain the request type.')
+
     request_str = ''
-
-    if source == 'coinapi':
-        if 'request_type' not in request:
-            error('The request dictionary must contain the request type.')
-
-        request_str = request_str + request.get('request_type')
-
+    cfg_file = '%s/api.cfg' % (os.path.dirname(os.path.realpath(__file__)))
+    api_cfg = read_api_cfg(cfg_file)
+	
+    if source in api_cfg.keys():
+        request_type = request.get('request_type')
+        if request_type not in api_cfg[source]['data'].keys():
+            error('The request type is currently not supported.')
+		
+        request_str = request_str + request_type
+		
         if for_url:
-            if 'symbol_id' in request:
-                request_str = request_str + '/' + request.get('symbol_id')
-            if 'period_id' in request:
-                request_str = request_str + '/history?period_id=' + request.get('period_id')
-            if 'time_start' in request:
-                request_str = request_str + '&time_start=' + request.get('time_start')
-            if 'time_end' in request:
-                request_str = request_str + '&time_end=' + request.get('time_end')
-            if 'include_empty_item' in request:
-                request_str = request_str + '&include_empty_item=' + request.get('include_empty_item')
-            if 'limit' in request:
-                request_str = request_str + '&limit=' + request.get('limit')
+            for attr in api_cfg[source]['data'][request_type]:
+                if attr[0] in request:
+                    if attr[0] == "time_start" and source == 'cryptocompare':
+                        t = datetime.strptime(request.get(attr[0]), "%Y-%m-%dT%H:%M:%S")
+                        t_unix = str(int(mktime(t.timetuple())+1e-6*t.microsecond))
+                        request_str = request_str + attr[1] + t_unix
+                    else:
+                        request_str = request_str + attr[1] + request.get(attr[0])
         else:
             if 'symbol_id' in request:
                 request_str = request_str + '_' + request.get('symbol_id')
             if 'period_id' in request:
                 request_str = request_str + '_' + request.get('period_id')
-
-        return request_str
+        return request_str	
     else:
         error('The source is not supported.')
+	
+    # if source == 'coinapi':
+        # if 'request_type' not in request:
+            # error('The request dictionary must contain the request type.')
 
+        # request_str = request_str + request.get('request_type')
 
+        # if for_url:
+            # if 'symbol_id' in request:
+                # request_str = request_str + '/' + request.get('symbol_id')
+            # if 'period_id' in request:
+                # request_str = request_str + '/history?period_id=' + request.get('period_id')
+            # if 'time_start' in request:
+                # request_str = request_str + '&time_start=' + request.get('time_start')
+            # if 'time_end' in request:
+                # request_str = request_str + '&time_end=' + request.get('time_end')
+            # if 'include_empty_item' in request:
+                # request_str = request_str + '&include_empty_item=' + request.get('include_empty_item')
+            # if 'limit' in request:
+                # request_str = request_str + '&limit=' + request.get('limit')
+        # else:
+            # if 'symbol_id' in request:
+                # request_str = request_str + '_' + request.get('symbol_id')
+            # if 'period_id' in request:
+                # request_str = request_str + '_' + request.get('period_id')
+
+        # return request_str
+
+	# else:
+        # error('The source is not supported.')
+
+def read_api_cfg(cfg_file):
+	with open(cfg_file,'r') as f:
+		cfg_str = f.read()
+		cfg_data = json.loads(cfg_str)
+	return cfg_data
+
+def covert_data(source,data,json_str):
+	
+	if source == "coinapi":
+		data = data.append(json_str, ignore_index=True)
+		df_out = convert_coinapi_data(data)
+	elif source == "cryptocompare":
+		data = data.append(json_str["Data"], ignore_index=True)
+		df_out = convert_cryptocompare_data(data)
+	return df_out
+	
 def convert_coinapi_data(data_coinapi):
     conversion_map = {'price_close': 'price_close',
                       'price_open': 'price_open',
@@ -123,3 +180,33 @@ def convert_coinapi_data(data_coinapi):
         data_standard[key] = data_coinapi[conversion_map[key]]
 
     return data_standard
+	
+def convert_cryptocompare_data(data_cc):
+    conversion_map = {'price_close': 'close',
+                      'price_open': 'open',
+                      'price_high': 'high',
+                      'price_low': 'low',
+                      'time_close': 'time',
+                      'time_open': 'time',
+                      'trades_count': 'na',
+                      'volume_traded': 'volumeto'}
+
+    data_standard = pd.DataFrame()
+    for key in conversion_map.keys():
+        if conversion_map[key] == 'time':
+            t = deepcopy(data_cc[conversion_map[key]])
+            for i in t.keys():
+                t[i]=datetime.fromtimestamp(data_cc[conversion_map[key]][i])
+                if key == 'time_open':
+                    #t[i] = t[i]-timedelta(1)
+                    t[i] = t[i].strftime("%Y-%m-%dT%H:%M:%S")
+                elif key == 'time_close':
+                    t[i] = t[i].strftime("%Y-%m-%dT%H:%M:%S")
+            data_standard[key] = t
+        elif conversion_map[key] == 'na':
+            data_standard[key] = ''
+        else:
+            data_standard[key] = data_cc[conversion_map[key]]
+
+    return data_standard
+
