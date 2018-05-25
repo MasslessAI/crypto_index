@@ -25,12 +25,19 @@ requires:
 * flask_restful
 * numpy
 """
-
-from flask import Flask, jsonify
-from flask_restful import Resource, Api
-import sqlite3
-import numpy as np
 from datetime import datetime, timedelta
+import numpy as np
+import sqlite3
+
+import sys
+sys.path.append('../')
+import cqt.datagen as dg
+import cqt.model.asset_model_component_spot as md
+
+
+from flask import Flask, jsonify, request
+from flask_restful import Resource, Api
+
 
 DB_PATH = './crypto_index.db'
 DEBUG_MODE = True
@@ -94,9 +101,48 @@ class HistData(Resource):
         length = len(dateList)
         return np.abs(np.random.randn(length)).tolist()
 
+class MarketData(Resource):
+	def post(self):
+		json_data = request.get_json(force=True)
+		print (json_data)
+		data_request = json_data['data_request']
+		data_source = json_data['data_source']
+		data_key = json_data['data_key']
+
+		data_obj = dg.data_gen(data_source, data_request, data_key, True)
+		data_json = data_obj.data.to_json(orient='split')
+		return data_json
+	
+	def get(self):
+		json_data = request.get_json(force=True)
+		print (json_data)
+		data_request = json_data['data_request']
+		data_source = json_data['data_source']
+		data_key = json_data['data_key']
+
+		data_obj = dg.data_gen(data_source, data_request, data_key, True)
+		data_json = data_obj.data.to_json(orient='records')
+		return data_json
+
+class MarketIndex(Resource):
+	def get(self):
+		json_data = request.get_json(force=True)
+		print (json_data)
+		data_request = json_data['data_request']
+		data_source = json_data['data_source']
+		data_key = json_data['data_key']
+
+		data_obj = dg.data_gen(data_source, data_request, data_key, True)
+		model_config = {'asset_type': 'spot'}
+		assetModelComponent = md.AssetModelComponentSpot('asset', data_obj,model_config)
+		return jsonify(assetModelComponent.signal_bear_or_bull())
+
+
 api.add_resource(Index, '/')
 api.add_resource(ExchangeRate, '/rate/<string:asset_id>')
 api.add_resource(HistData, '/histdata/<string:asset_id>/<string:begDateStr>/<string:endDateStr>')
+api.add_resource(MarketData,'/marketdata')
+api.add_resource(MarketIndex,'/marketindex')
 
 if __name__ == '__main__':
     app.run(debug=DEBUG_MODE)
