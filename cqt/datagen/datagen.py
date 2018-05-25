@@ -94,17 +94,19 @@ def get_req_str(source, request, for_url=True):
     cfg_file = '%s/api.cfg' % (os.path.dirname(os.path.realpath(__file__)))
     api_cfg = read_api_cfg(cfg_file)
 	
+    
+    
     if source in api_cfg.keys():
         request_type = request.get('request_type')
         if request_type not in api_cfg[source]['data'].keys():
             error('The request type is currently not supported.')
 		
         request_str = request_str + request_type
-		
+        unix_time_flag = api_cfg[source]['unix_time']
         if for_url:
             for attr in api_cfg[source]['data'][request_type]:
                 if attr[0] in request:
-                    if attr[0] == "time_start" and source == 'cryptocompare':
+                    if "time_" in attr[0] and unix_time_flag == 'true':
                         t = datetime.strptime(request.get(attr[0]), "%Y-%m-%dT%H:%M:%S")
                         t_unix = str(int(mktime(t.timetuple())+1e-6*t.microsecond))
                         request_str = request_str + attr[1] + t_unix
@@ -163,6 +165,9 @@ def covert_data(source,data,json_str):
 	elif source == "cryptocompare":
 		data = data.append(json_str["Data"], ignore_index=True)
 		df_out = convert_cryptocompare_data(data)
+	elif source == "gdax":
+		#data = data.append(json_str, ignore_index=True)
+		df_out = convert_gdax_data(json_str)
 	return df_out
 	
 def convert_coinapi_data(data_coinapi):
@@ -180,7 +185,30 @@ def convert_coinapi_data(data_coinapi):
         data_standard[key] = data_coinapi[conversion_map[key]]
 
     return data_standard
-	
+
+def convert_gdax_data(data_gdax):
+    header = ['time','low','high','open','close','volumn']
+    conversion_map = {'price_close': 'close',
+                      'price_open': 'open',
+                      'price_high': 'high',
+                      'price_low': 'low',
+                      'time_close': 'time',
+                      'time_open': 'time',
+                      'trades_count': 'na',
+                      'volume_traded': 'volumn'}
+
+    data_standard = pd.DataFrame()
+    tmp_df = pd.DataFrame(data_gdax,columns=header)
+    for key in conversion_map.keys():
+        if conversion_map[key] == 'time':
+            data_standard[key] = date_unix_to_iso(tmp_df[conversion_map[key]])
+        elif conversion_map[key] == 'na':
+            data_standard[key] = ''
+        else:
+            data_standard[key] = tmp_df[conversion_map[key]]
+
+    return data_standard    
+
 def convert_cryptocompare_data(data_cc):
     conversion_map = {'price_close': 'close',
                       'price_open': 'open',
@@ -194,15 +222,7 @@ def convert_cryptocompare_data(data_cc):
     data_standard = pd.DataFrame()
     for key in conversion_map.keys():
         if conversion_map[key] == 'time':
-            t = deepcopy(data_cc[conversion_map[key]])
-            for i in t.keys():
-                t[i]=datetime.fromtimestamp(data_cc[conversion_map[key]][i])
-                if key == 'time_open':
-                    #t[i] = t[i]-timedelta(1)
-                    t[i] = t[i].strftime("%Y-%m-%dT%H:%M:%S")
-                elif key == 'time_close':
-                    t[i] = t[i].strftime("%Y-%m-%dT%H:%M:%S")
-            data_standard[key] = t
+            data_standard[key] = date_unix_to_iso(data_cc[conversion_map[key]])
         elif conversion_map[key] == 'na':
             data_standard[key] = ''
         else:
@@ -210,3 +230,8 @@ def convert_cryptocompare_data(data_cc):
 
     return data_standard
 
+def date_unix_to_iso (df):
+    t = deepcopy(df)
+    for i in t.keys():
+        t[i]=datetime.fromtimestamp(df[i]).strftime("%Y-%m-%dT%H:%M:%S")
+    return t
