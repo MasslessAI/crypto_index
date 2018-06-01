@@ -40,7 +40,7 @@ class IndexedData(object):
             error('volume_traded is not in the input data.')
 
 
-def data_gen(source, request, key=None, write_to_file=False):
+def data_gen(source, request, key=None, write_to_file=False, sync_to_db=True, returnDF=False):
     
     cfg_file = '%s/api.cfg' % (os.path.dirname(os.path.realpath(__file__)))
     api_cfg = read_api_cfg(cfg_file)
@@ -63,9 +63,11 @@ def data_gen(source, request, key=None, write_to_file=False):
 
         df = covert_data(source,df,json_str)
 
-        for key in request:
-            df[key] = request[key]
-
+        # for key in request:
+            # df[key] = request[key]
+        # if not 'time_end' in df.keys():
+            # now_str = "{:%Y-%m-%dT%H:%M:%S}".format(datetime.now())
+            # df['time_end'] = df.apply(lambda row: now_str,axis=1)
         indexed_data = IndexedData(source, request, df)
         if write_to_file:
             data_path = '../data/csv/'
@@ -77,7 +79,18 @@ def data_gen(source, request, key=None, write_to_file=False):
             pickle_out = open(data_path + data_file_pickle, "wb")
             pickle.dump(indexed_data, pickle_out)
             pickle_out.close()
-
+        
+        # if sync_to_db:
+            # db_path = '../data/database/historical_timeseries.db'
+            # engine = create_engine('sqlite:///%s' % db_path)
+            # conn = engine.connect()
+            
+            # df_btc_1d.to_sql('GEMINI_SPOT_BTC_USD', conn, if_exists='replace')
+            
+            # conn.close()
+        
+        if returnDF:
+            return df
         return indexed_data
     else:
         error('The source or request is not supported.')
@@ -178,11 +191,15 @@ def convert_coinapi_data(data_coinapi):
                       'time_close': 'time_close',
                       'time_open': 'time_open',
                       'trades_count': 'trades_count',
-                      'volume_traded': 'volume_traded'}
+                      'volume_traded': 'volume_traded',
+                      'key': 'time_open'}
 
     data_standard = pd.DataFrame()
     for key in conversion_map.keys():
-        data_standard[key] = data_coinapi[conversion_map[key]]
+        if key == 'key':
+            data_standard[key] = getDate(data_coinapi[conversion_map[key]])
+        else:
+            data_standard[key] = data_coinapi[conversion_map[key]]
 
     return data_standard
 
@@ -195,13 +212,18 @@ def convert_gdax_data(data_gdax):
                       'time_close': 'time',
                       'time_open': 'time',
                       'trades_count': 'na',
-                      'volume_traded': 'volumn'}
+                      'volume_traded': 'volumn',
+                      'key': 'time_open'}
 
     data_standard = pd.DataFrame()
     tmp_df = pd.DataFrame(data_gdax,columns=header)
     for key in conversion_map.keys():
         if conversion_map[key] == 'time':
-            data_standard[key] = date_unix_to_iso(tmp_df[conversion_map[key]])
+            tmp_val = date_unix_to_iso(tmp_df[conversion_map[key]])
+            if key == 'key':
+                data_standard[key] = tmp_val.split('T')[0]
+            else:
+                data_standard[key] = tmp_val
         elif conversion_map[key] == 'na':
             data_standard[key] = ''
         else:
@@ -217,12 +239,17 @@ def convert_cryptocompare_data(data_cc):
                       'time_close': 'time',
                       'time_open': 'time',
                       'trades_count': 'na',
-                      'volume_traded': 'volumeto'}
+                      'volume_traded': 'volumeto',
+                      'key': 'time_open'}
 
     data_standard = pd.DataFrame()
     for key in conversion_map.keys():
         if conversion_map[key] == 'time':
-            data_standard[key] = date_unix_to_iso(data_cc[conversion_map[key]])
+            tmp_val = date_unix_to_iso(data_cc[conversion_map[key]])
+            if key == 'key':
+                data_standard[key] = tmp_val.split('T')[0]
+            else:
+                data_standard[key] = tmp_val
         elif conversion_map[key] == 'na':
             data_standard[key] = ''
         else:
@@ -234,4 +261,10 @@ def date_unix_to_iso (df):
     t = deepcopy(df)
     for i in t.keys():
         t[i]=datetime.fromtimestamp(df[i]).strftime("%Y-%m-%dT%H:%M:%S")
+    return t
+
+def getDate (df):
+    t = deepcopy(df)
+    for i in t.keys():
+        t[i]=df[i].split('T')[0]
     return t
