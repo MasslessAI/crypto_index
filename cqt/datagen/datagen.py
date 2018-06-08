@@ -126,6 +126,7 @@ def get_req_str(source, request, for_url=True):
                     else:
                         request_str = request_str + attr[1] + request.get(attr[0])
         else:
+            request_str = source + '_' + request_str
             if 'symbol_id' in request:
                 request_str = request_str + '_' + request.get('symbol_id')
             if 'period_id' in request:
