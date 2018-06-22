@@ -17,6 +17,23 @@ import json
 
 db_cfg_file = '%s/db.cfg' % (os.path.dirname(os.path.realpath(__file__)))
 
+class IndexedDBObj(object):
+    def __init__(self, df, id):
+        self.data = df
+        self.id = id
+        tmp = id.split('-')
+        self.source = tmp[0]
+        self.type = tmp[1]
+        self.symbol = tmp[2]
+        self.period = tmp[3]
+        self.setFromToDates()
+    
+    def setFromToDates(self):
+        self.fromTime = self.data.key.sort_values().iloc[0]
+        self.toTime = self.data.key.sort_values().iloc[-1]
+
+
+
 def error(msg):
     print(msg)
     sys.exit(64)
@@ -58,7 +75,7 @@ def mergeTwoTables(tbl_final,tbl_tmp,conn):
 
     
 def deleteTable(tbl,conn):
-    sql_str = 'DROP TABLE IF EXISTS %s'%tbl
+    sql_str = 'DROP TABLE IF EXISTS "%s"'%tbl
     conn.execute(sql_str)    
     
     
@@ -71,8 +88,11 @@ def dump_to_db(df, tbl_name, key_field='key',db_id = 'Amazon_RDS'):
     
     tbl_toDB = tbl_name
     if tbl_exists:
-        tmp_tbl = 'tmp_' + tbl_name
+        tmp_tbl = 'tmp-' + tbl_name
         tbl_toDB = tmp_tbl
+    
+    now_str = str(datetime.now())
+    df['LastUpdated']=now_str
     
     df.to_sql(tbl_toDB, conn, if_exists='replace',index=False)
     add_primary_key = genAddPrimaryKeySQL(tbl_toDB,key_field)
@@ -107,11 +127,13 @@ def get_from_db(tbl_name,from_date='',to_date='',db_id = 'Amazon_RDS'):
     else:
         select_str = select([table]).where(and_(table.c.key >= from_date,table.c.key <= to_date))
     
-    df=pd.read_sql(select_str,conn)
+    df = pd.read_sql(select_str,conn)
     
     conn.close()
     
-    return df
+    DBObj = IndexedDBObj(df,tbl_name)
+    
+    return DBObj
 
 
 

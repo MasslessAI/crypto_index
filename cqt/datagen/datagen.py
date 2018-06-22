@@ -129,11 +129,11 @@ def get_req_str(source, request, for_url=True):
                     else:
                         request_str = request_str + attr[1] + request.get(attr[0])
         else:
-            request_str = source + '_' + request_str
+            request_str = source + '-' + request_str
             if 'symbol_id' in request:
-                request_str = request_str + '_' + request.get('symbol_id')
+                request_str = request_str + '-' + request.get('symbol_id')
             if 'period_id' in request:
-                request_str = request_str + '_' + request.get('period_id')
+                request_str = request_str + '-' + request.get('period_id')
         return request_str	
     else:
         error('The source is not supported.')
