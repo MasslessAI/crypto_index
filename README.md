@@ -4,7 +4,7 @@ The CQT package is a package for crypto quant trading. It includes the following
 
 1. **DataGen**: Unified interface for data query and processing. Specific data objects are designed to 
 handle various trading data for crypto assets. It contains utility functions to query data from 
-different exchanges/data providers, and restore them in a standard OCHLV data format indexed by query
+different exchanges/data providers, and restore them in a standard OHLCV data format indexed by query
 dictionary
 
 2. **Model**: Built from 'spot', 'forward' and 'vol' asset model components, the model class is used to 

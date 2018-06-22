@@ -1,6 +1,7 @@
 from cqt import (
     metadata,
     model,
+    analysis,
     portfolio,
     strategy
 )
@@ -14,6 +15,7 @@ __copyright__ = metadata.copyright
 __all__ = [
     'datagen',
     'model',
+    'analysis',
     'portfolio',
     'strategy'
 ]

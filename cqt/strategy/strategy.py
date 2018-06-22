@@ -30,7 +30,7 @@ class Strategy(object):
             report_col.append(asset + '_price')
 
         report = pd.DataFrame(columns=report_col)
-        asset_prices_frame = self.asset_model.concat_prices()
+        asset_prices_frame = self.asset_model.get_prices_close_frame()
         prtf = portfolio.Portfolio(copy.deepcopy(self.initial_portfolio.asset_holdings),
                                    self.initial_portfolio.cash)
 

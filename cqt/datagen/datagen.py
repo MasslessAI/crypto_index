@@ -21,6 +21,9 @@ class IndexedData(object):
         self.data = data
         self.validate()
 
+    def copy(self):
+        self.data = self.data.copy()
+
     def validate(self):
         if 'price_close' not in self.data.keys():
             error('price_close is not in the input data.')
