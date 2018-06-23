@@ -42,11 +42,20 @@ class AssetModel(object):
 
     def get_prices_close_frame(self):
         price_dict = pd.DataFrame()
+        price_dict['lkey']=None
         for target in self.model_dict.keys():
             component = self.model_dict[target]
+            print(target)
             # price_dict[component.target]A.merge(B, left_on='lkey', right_on='rkey', how='outer')component.get_price_close()
-            price_dict.merge(component.get_price_close(), left_on='lkey', right_on='rkey', how='outer')
-
+            df = component.get_price_close().to_frame().reset_index()
+            df.columns =['rkey', target]
+            if price_dict.empty:
+                price_dict = df.copy()
+                price_dict.rename(columns={'rkey':'lkey'}, inplace=True)
+            else:
+                price_dict.merge(df, left_on='lkey', right_on='rkey', how='outer')
+            
+        price_dict.set_index('lkey', inplace=True)
         return price_dict
 
     def insert_component(self, component):

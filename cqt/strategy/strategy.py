@@ -33,7 +33,7 @@ class Strategy(object):
         asset_prices_frame = self.asset_model.get_prices_close_frame()
         prtf = portfolio.Portfolio(copy.deepcopy(self.initial_portfolio.asset_holdings),
                                    self.initial_portfolio.cash)
-
+        print(asset_prices_frame)#debug
         if start_date is None:
             start_date = asset_prices_frame.index[lag+1]
         if end_date is None:
@@ -55,6 +55,7 @@ class Strategy(object):
 
         for i in range(len(asset_prices_frame.index)-lag-2):
             time = asset_prices_frame.index[i+lag+2]
+            print(start_date, time, end_date) # debug
             if start_date < time < end_date:
                 self.apply_event_logic(time, prtf)
                 asset_prices = self.asset_model.get_prices_close(time)
