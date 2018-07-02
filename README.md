@@ -7,19 +7,21 @@ handle various trading data for crypto assets. It contains utility functions to 
 different exchanges/data providers, and restore them in a standard OHLCV data format indexed by query
 dictionary
 
-2. **Model**: Built from 'spot', 'forward' and 'vol' asset model components, the model class is used to 
-hold the data from different types of assets. In each model (component), we attach the corresponding
-model configurations as guideline to postprocess and analyze the input data, performance statistical 
-inference, and provide interface functions for a large set of market signals (e.g. bear/bull, moving 
-average crossing, and etc)
+2. **Env**: Built from 'spot', 'forward' and 'vol' asset env components, the env class is used to 
+hold the data from different types of assets. In each env (component), we attach the corresponding
+env configurations as guideline to postprocess and analyze the input data, performance statistical 
+inference.
 
-3. **Portfolio**: Standardized holding class, which provides the basic logics of buy/sell and set aside
+3. **Analyze**: Generate analysis from environments and provide interface functions for a large set 
+of market signals (e.g. bear/bull, moving average crossing, and etc)
+
+4. **Ledger**: Standardized holding class, which provides the basic logics of buy/sell and set aside
 functions to track the changes on the asset holdings and cash
 
-4. **Strategy**: Valuation engine that combines Model and Portfolio. It takes the signals generated from
-Model, and follow the strategy logic to update the Portfolio. Back testing is provided to test the 
-strategy against the historical data in the Model. New strategies be derived from the base class simply
+5. **Strategy**: Valuation engine that combines Env and Ledger. It takes the signals generated from
+Env, and follow the strategy logic to update the Ledger. Back testing is provided to test the 
+strategy against the historical data in the Env. New strategies be derived from the base class simply
 and one can implement their own trading logic
 
-5. **Execution**: It provides linkage with certain exchange API, which can execute the strategy based
-on the portfolio information
+6. **Execution**: It provides linkage with certain exchange API, which can execute the strategy based
+on the ledger information
