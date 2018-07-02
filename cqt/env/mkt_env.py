@@ -57,20 +57,16 @@ class MktEnv(object):
         return price_dict
 
     def get_prices_close_frame(self):
-        price_dict = pd.DataFrame()
-        price_dict['lkey'] = None
+        price_frame = pd.DataFrame()
         for target in self.model_dict.keys():
             section = self.model_dict[target]
-            df = section.get_price_close().to_frame().reset_index()
-            df.columns = ['rkey', target]
-            if price_dict.empty:
-                price_dict = df.copy()
-                price_dict.rename(columns={'rkey': 'lkey'}, inplace=True)
+            df = section.get_price_close().to_frame()
+            if len(price_frame) == 0:
+                price_frame = df
             else:
-                price_dict.merge(df, left_on='lkey', right_on='rkey', how='outer')
+                price_frame = pd.merge(price_frame, df, left_index=True, right_index=True)
 
-        price_dict.set_index('lkey', inplace=True)
-        return price_dict
+        return price_frame
 
     def insert_section(self, section):
         model_dict = self.model_dict
