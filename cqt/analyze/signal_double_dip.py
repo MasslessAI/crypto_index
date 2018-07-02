@@ -6,24 +6,22 @@ from datetime import timedelta
 import matplotlib.pyplot as plt
 
 from cqt.error_msg import error
-from cqt.model import asset_model
-from cqt.model import asset_model_component_spot
-from cqt.model.valuation_parameters import ValuationParametersMovingAverage
+from cqt.analyze.val_param import ValParamMovingAverage
 
 
-def signal_double_dip(model, asset, time=None, val_param=None):
+def signal_double_dip(env, asset, time=None, val_param=None):
     if val_param is None:
         val_param = {'window_size': [3, 20]}
 
     if len(val_param['window_size']) != 2:
         error('For double dip, two window sizes need to be provided in the rule.')
 
-    dip_param = ValuationParametersMovingAverage(val_param)
+    dip_param = ValParamMovingAverage(val_param)
     window_ma = dip_param.window_size[0]
     window_dip = dip_param.window_size[1]
-    component = model.get_component(asset)
+    section = env.get_section(asset)
 
-    series = component.get_price_close()
+    series = section.get_price_close()
 
     if time is None:
         time = series.index[-1]

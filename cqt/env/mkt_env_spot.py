@@ -1,20 +1,18 @@
 import numpy as np
 import pandas as pd
-import copy
 from datetime import datetime
 from datetime import timedelta
 import matplotlib.pyplot as plt
 
 from cqt.error_msg import error
+from cqt.env.mkt_env import MktEnvSec
 
 
-class AssetModelComponentSpot(object):
-    def __init__(self, target, indexed_data, model_config):
-        self.asset_type = 'spot'
-        self.target = target
-        self.data_info = indexed_data.index
-        self.data = copy.deepcopy(indexed_data.data)
-        self.model_config = model_config
+class MktEnvSpot(MktEnvSec):
+    def __init__(self, target, data_collection, config):
+        super(MktEnvSpot, self).__init__(target, data_collection, config)
+
+        self.type = 'spot'
 
         time_close = []
         for time in self.data.time_close:
@@ -43,29 +41,30 @@ class AssetModelComponentSpot(object):
         self.data['period_abs_return'] = self.data['price_mid'].shift(1) / self.data['price_mid'] - 1
         self.data['period_log_return'] = np.log(self.data['price_mid'].shift(1) / self.data['price_mid'])
         self.data.fillna(0)
+        self.data.columns = self.target + '_' + self.data.columns
 
     def get_price_close(self, time=None):
         if time is None:
-            return self.data.price_close
+            return self.data[self.target + '_price_close']
 
-        series = self.data.price_close
+        series = self.data[self.target + '_price_close']
         series_trunc = series.truncate(after=time)
         return series_trunc.iloc[-1]
 
     def plot_price_close(self):
-        plt.plot(self.data.index, self.data.price_close)
+        plt.plot(self.data.index, self.data[self.target + '_price_close'])
         plt.show()
 
     def get_log_return(self, time=None):
         if time is None:
-            return self.data.period_log_return
+            return self.data[self.target + '_period_log_return']
 
-        series = self.data.period_log_return
+        series = self.data[self.target + '_period_log_return']
         series_trunc = series.truncate(after=time)
         return series_trunc.iloc[-1]
 
     def plot_log_return(self):
-        plt.plot(self.data.index, self.data.period_log_return)
+        plt.plot(self.data.index, self.data[self.target + '_period_log_return'])
         plt.show()
 
     def get_close_moving_average(self, window_size, time=None, damping_factor=None):
@@ -77,11 +76,11 @@ class AssetModelComponentSpot(object):
             time_start = time - timedelta(days=window_size)
 
         if damping_factor is None:
-            ma_series = self.data.price_close.truncate(before=time_start, after=time_end)
+            ma_series = self.data[self.target + '_price_close'].truncate(before=time_start, after=time_end)
             ma_series = ma_series.rolling(window_size).mean()
             ma_series = ma_series.dropna()
         else:
-            series = self.data.price_close.truncate(before=time_start, after=time_end)
+            series = self.data[self.target + '_price_close'].truncate(before=time_start, after=time_end)
             series_size = len(series)
             if series_size < window_size:
                 error('The input series is shorter than the window size.')
@@ -93,7 +92,7 @@ class AssetModelComponentSpot(object):
                     scalar = damping_factor ** j
                     avg = avg + scalar * series.iloc[window_size + i - j - 1]
                 avg = avg / window_size
-                ma_series.set_value(series.index[window_size + i - 1], avg)
+                ma_series.at[window_size + i - 1] = avg
 
         return ma_series
 
@@ -108,6 +107,12 @@ class AssetModelComponentSpot(object):
         plt.show()
 
     def stat(self, time_start=None, time_end=None):
+        """
+        calculate the simple statistics on the columns of the section of the environment
+        :param time_start:
+        :param time_end:
+        :return: statistics table
+        """
         if time_start is None and time_end is None:
             stat_data = self.data
         elif time_start is None:

@@ -1,14 +1,18 @@
 from cqt.error_msg import error
 
 
-class ValuationParameters(object):
+class ValParam(object):
     def __init__(self, param_dict):
+        """
+        Standardized valuation parameters
+        :param param_dict:
+        """
         pass
 
 
-class ValuationParametersMovingAverage(ValuationParameters):
+class ValParamMovingAverage(ValParam):
     def __init__(self, param_dict):
-        super(ValuationParametersMovingAverage, self).__init__(param_dict)
+        super(ValParamMovingAverage, self).__init__(param_dict)
 
         self.type = 'moving_average'
 
@@ -30,7 +34,7 @@ class ValuationParametersMovingAverage(ValuationParameters):
         if 'calculation_period' in param_dict.keys():
             self.calculation_period = param_dict['calculation_period']
         else:
-            self.calculation_period = 1
+            self.calculation_period = 2
 
         if 'damping_factor' in param_dict.keys():
             self.damping_factor = param_dict['damping_factor']

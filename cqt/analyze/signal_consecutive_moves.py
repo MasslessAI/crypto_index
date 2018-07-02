@@ -6,12 +6,10 @@ from datetime import timedelta
 import matplotlib.pyplot as plt
 
 from cqt.error_msg import error
-from cqt.model import asset_model
-from cqt.model import asset_model_component_spot
-from cqt.model.valuation_parameters import ValuationParametersMovingAverage
+from cqt.analyze.val_param import ValParamMovingAverage
 
 
-def signal_consecutive_moves(model, asset, time=None, val_param=None):
+def signal_consecutive_moves(env, asset, time=None, val_param=None):
     if val_param is None:
         val_param = {'method': 'moving_average',
                      'window_size': [10],
@@ -19,16 +17,14 @@ def signal_consecutive_moves(model, asset, time=None, val_param=None):
                      'tolerance_down': 0.03}
 
     if val_param['method'] == 'moving_average':
-        ma_param = ValuationParametersMovingAverage(val_param)
-        component = model.get_component(asset)
+        ma_param = ValParamMovingAverage(val_param)
+        section = env.get_section(asset)
         window_size = ma_param.window_size[0]
 
         if time is None:
-            time = component.data.index[-1]
-        else:
-            time = datetime.strptime(time[:10], '%Y-%m-%d')
+            time = section.data.index[-1]
 
-        if component.data.size < window_size + 2:
+        if section.data.size < window_size + 2:
             error('Cannot calculate the moving average. The series is too short.')
 
         factor = ma_param.damping_factor
@@ -39,7 +35,7 @@ def signal_consecutive_moves(model, asset, time=None, val_param=None):
         average = []
         for i in range(ma_param.calculation_period):
             time_end = time - timedelta(days=i)
-            average.append(component.get_close_moving_average(window_size, time_end, factor).iloc[-1])
+            average.append(section.get_close_moving_average(window_size, time_end, factor).iloc[-1])
 
         for i in range(len(average)-1):
             is_bull = is_bull and (average[i] > (1 - ma_param.tolerance_up) * average[i+1])
