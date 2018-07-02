@@ -1,7 +1,7 @@
-./notebooks/.ipynb_checkpoints/*
+notebooks/.ipynb_checkpoints
 ./cqt/__pycache__
-./.idea/*
 __pycache__
+.idea
 notebooks/Untitled2.ipynb
 notebooks/Untitled.ipynb
 notebooks/Untitled1.ipynb
