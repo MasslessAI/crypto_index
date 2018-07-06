@@ -43,7 +43,7 @@ class IndexedData(object):
             error('volume_traded is not in the input data.')
 
 
-def data_gen(source, request, key=None, write_to_file=False, sync_to_db=True, returnDF=False):
+def data_gen(source, request, keyList=None, write_to_file=False, sync_to_db=True, returnDF=False):
     
     cfg_file = '%s/api.cfg' % (os.path.dirname(os.path.realpath(__file__)))
     api_cfg = read_api_cfg(cfg_file)
@@ -53,14 +53,24 @@ def data_gen(source, request, key=None, write_to_file=False, sync_to_db=True, re
         request_str = get_req_str(source, request)
         request_url = source_url + request_str
         print(request_url)
-        if "header" in api_cfg[source].keys() and not key is None:
-            headers = {api_cfg[source]['header']: key}
-            response = requests.get(request_url, headers=headers)
-        else:
-            response = requests.get(request_url)
-
+        if not keyList is None:
+            for key in keyList:
+                if "header" in api_cfg[source].keys() and not key is None:
+                    headers = {api_cfg[source]['header']: key}
+                    response = requests.get(request_url, headers=headers)
+                else:
+                    response = requests.get(request_url)
+                if response.status_code == 200:
+                    break
+                else:
+                    print("Response yields a status code of %i (non-200), trying for next key" % response.status_code)
+        if response.status_code != 200:
+            print(response.text)
+            error('response yields %i status code, exiting...'%response.status_code)
+            
+        
         json_str = response.json()
-
+        #print(json_str)
         df = pd.DataFrame()
         #df = df.append(json_str, ignore_index=True)
 
