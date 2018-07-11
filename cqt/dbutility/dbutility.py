@@ -19,6 +19,9 @@ db_cfg_file = '%s/db.cfg' % (os.path.dirname(os.path.realpath(__file__)))
 
 class IndexedDBObj(object):
     def __init__(self, df, id):
+        #print(df)
+        #self.data = df.rename(index=str, columns={'price_close':'close','price_open':'open','price_high':'high','price_low':'low'}, inplace=True)
+        #print(self.data)
         self.data = df
         self.id = id
         tmp = id.split('-')
@@ -27,6 +30,7 @@ class IndexedDBObj(object):
         self.symbol = tmp[2]
         self.period = tmp[3]
         self.setFromToDates()
+        self.data.rename(index=str, columns={'price_close':'close','price_open':'open','price_high':'high','price_low':'low'}, inplace=True)
     
     def setFromToDates(self):
         self.fromTime = self.data.key.sort_values().iloc[0]
