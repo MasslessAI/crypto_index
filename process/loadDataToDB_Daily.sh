@@ -30,7 +30,7 @@ then
 fi
 
 today_date=$(date +%Y%m%d)
-start_date=$(date +%Y-%m-%dT00:00:00 -d '$bufferDays days ago')
+start_date=$(date +%Y-%m-%dT00:00:00 -d "$bufferDays days ago")
 #start_date='2018-06-15T00:00:00'
 
 runDir=$prodDir/dynamic_$today_date
@@ -53,6 +53,7 @@ sed -i s#"end_yyyymmddThhmmss"#""#g $loadFile
 apiKeyFile=$prodDir/cfg/API_keys.cfg
 [[ ! -f $apiKeyFile ]] && reportErr "$apiKeyFile does not exist!"
 
+echo "`date` [INFO]: $PYTHON $SCRIPT_DIR/LoadSymbolToDB.py $apiKeyFile $loadFile > $logDir/loadSymbolToDB.$today_date.log 2>&1"
 $PYTHON $SCRIPT_DIR/LoadSymbolToDB.py $apiKeyFile $loadFile > $logDir/loadSymbolToDB.$today_date.log 2>&1
 
 
