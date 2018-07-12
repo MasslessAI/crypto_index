@@ -1,6 +1,7 @@
 #!/drives/d/Anaconda/python
 import sys
 sys.path.append('../')
+sys.path.append('/home/cqtrun/dailyRun/env0/bin/crypto_index')
 import cqt
 import cqt.datagen as dg
 import pandas as pd
