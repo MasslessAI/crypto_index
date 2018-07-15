@@ -9,7 +9,7 @@ from cqt.env.mkt_env import MktEnvSec
 
 
 class MktEnvSpot(MktEnvSec):
-    def __init__(self, target, data_collection, config):
+    def __init__(self, target, data_collection, config=None):
         super(MktEnvSpot, self).__init__(target, data_collection, config)
 
         self.type = 'spot'

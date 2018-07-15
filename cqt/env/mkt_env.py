@@ -9,7 +9,7 @@ from cqt.error_msg import error
 
 
 class MktEnvSec(object):
-    def __init__(self, target, indexed_data, config):
+    def __init__(self, target, indexed_data, config=None):
         """
         Initialize a market environment section, e.g. BTC.
 
@@ -19,8 +19,11 @@ class MktEnvSec(object):
         """
         self.target = target
         self.data = copy.deepcopy(indexed_data.data)
-        self.config = config
         self.data_info = indexed_data.index
+        if config is None:
+            self.config = {}
+        else:
+            self.config = config
 
 
 class MktEnv(object):

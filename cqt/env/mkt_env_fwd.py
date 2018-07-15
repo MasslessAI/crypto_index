@@ -9,7 +9,7 @@ from cqt.env.mkt_env import MktEnvSec
 
 
 class MktEnvrFwd(MktEnvSec):
-    def __init__(self, target, data_collection, config):
+    def __init__(self, target, data_collection, config=None):
         super(MktEnvrFwd, self).__init__(target, data_collection, config)
 
         self.type = 'forward'
