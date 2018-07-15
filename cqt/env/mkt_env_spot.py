@@ -41,30 +41,30 @@ class MktEnvSpot(MktEnvSec):
         self.data['period_abs_return'] = self.data['price_mid'].shift(1) / self.data['price_mid'] - 1
         self.data['period_log_return'] = np.log(self.data['price_mid'].shift(1) / self.data['price_mid'])
         self.data.fillna(0)
-        self.data.columns = self.target + '_' + self.data.columns
+        # self.data.columns = self.target + '_' + self.data.columns
 
     def get_price_close(self, time=None):
         if time is None:
-            return self.data[self.target + '_price_close']
+            return self.data['price_close']
 
-        series = self.data[self.target + '_price_close']
+        series = self.data['price_close']
         series_trunc = series.truncate(after=time)
         return series_trunc.iloc[-1]
 
     def plot_price_close(self):
-        plt.plot(self.data.index, self.data[self.target + '_price_close'])
+        plt.plot(self.data.index, self.data['price_close'])
         plt.show()
 
     def get_log_return(self, time=None):
         if time is None:
-            return self.data[self.target + '_period_log_return']
+            return self.data['period_log_return']
 
-        series = self.data[self.target + '_period_log_return']
+        series = self.data['period_log_return']
         series_trunc = series.truncate(after=time)
         return series_trunc.iloc[-1]
 
     def plot_log_return(self):
-        plt.plot(self.data.index, self.data[self.target + '_period_log_return'])
+        plt.plot(self.data.index, self.data['period_log_return'])
         plt.show()
 
     def get_close_moving_average(self, window_size, time=None, damping_factor=None):
@@ -76,11 +76,11 @@ class MktEnvSpot(MktEnvSec):
             time_start = time - timedelta(days=window_size)
 
         if damping_factor is None:
-            ma_series = self.data[self.target + '_price_close'].truncate(before=time_start, after=time_end)
+            ma_series = self.data['price_close'].truncate(before=time_start, after=time_end)
             ma_series = ma_series.rolling(window_size).mean()
             ma_series = ma_series.dropna()
         else:
-            series = self.data[self.target + '_price_close'].truncate(before=time_start, after=time_end)
+            series = self.data['price_close'].truncate(before=time_start, after=time_end)
             series_size = len(series)
             if series_size < window_size:
                 error('The input series is shorter than the window size.')

@@ -1,6 +1,7 @@
 import os
 import sys
 sys.path.append('../')
+sys.path.append('/home/cqtrun/dailyRun/env0/bin/crypto_index')
 import cqt
 import cqt.datagen as dg
 import pandas as pd
@@ -19,6 +20,9 @@ db_cfg_file = '%s/db.cfg' % (os.path.dirname(os.path.realpath(__file__)))
 
 class IndexedDBObj(object):
     def __init__(self, df, id):
+        #print(df)
+        #self.data = df.rename(index=str, columns={'price_close':'close','price_open':'open','price_high':'high','price_low':'low'}, inplace=True)
+        #print(self.data)
         self.data = df
         self.id = id
         tmp = id.split('-')
@@ -27,6 +31,7 @@ class IndexedDBObj(object):
         self.symbol = tmp[2]
         self.period = tmp[3]
         self.setFromToDates()
+        self.data.rename(index=str, columns={'price_close':'close','price_open':'open','price_high':'high','price_low':'low'}, inplace=True)
     
     def setFromToDates(self):
         self.fromTime = self.data.key.sort_values().iloc[0]
@@ -69,7 +74,9 @@ def checkTableExistence(tbl, conn):
 
             
 def mergeTwoTables(tbl_final,tbl_tmp,conn):
-    sql_str = 'insert into "%s" (select * from "%s") on conflict (key) do nothing'% (tbl_final,tbl_tmp)
+    column_names = "time_close, time_open, trades_count, price_low, price_open, price_close, key, volume_traded, price_high, last_updated"
+    sql_str = 'insert into "%s" (%s)(select %s from "%s") on conflict (key) do nothing'% (tbl_final,column_names,column_names,tbl_tmp)
+    print(sql_str)
     conn.execute(sql_str)
     return 0
 
@@ -92,7 +99,7 @@ def dump_to_db(df, tbl_name, key_field='key',db_id = 'Amazon_RDS'):
         tbl_toDB = tmp_tbl
     
     now_str = str(datetime.now())
-    df['LastUpdated']=now_str
+    df['last_updated']=now_str
     
     df.to_sql(tbl_toDB, conn, if_exists='replace',index=False)
     add_primary_key = genAddPrimaryKeySQL(tbl_toDB,key_field)

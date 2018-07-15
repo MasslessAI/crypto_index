@@ -63,7 +63,8 @@ class MktEnv(object):
         price_frame = pd.DataFrame()
         for target in self.model_dict.keys():
             section = self.model_dict[target]
-            df = section.get_price_close().to_frame()
+            df = section.get_price_close().to_frame().copy()
+            df.columns = target + '_' + df.columns
             if len(price_frame) == 0:
                 price_frame = df
             else:
