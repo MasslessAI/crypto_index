@@ -8,6 +8,7 @@ from datetime import datetime
 from time import mktime
 from copy import deepcopy
 
+
 def error(msg):
     print(msg)
     sys.exit(64)

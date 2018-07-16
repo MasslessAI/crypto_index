@@ -24,7 +24,7 @@ class Strategy(object):
         self.rules = rules
 
     def apply_event_logic(self, time, ledger):
-        pass
+        return ledger
 
     def back_testing(self, start_date=None, end_date=None, lag=3):
         report_col = ['date', 'total', 'pnl', 'cash', 'set_aside']
@@ -36,8 +36,8 @@ class Strategy(object):
         asset_prices_frame = self.env.get_prices_close_frame()
         ledger = Ledger(copy.deepcopy(self.initial.holdings), self.initial.cash)
 
-        #debug
-        #print(asset_prices_frame)
+        # debug
+        # print(asset_prices_frame)
 
         if start_date is None:
             start_date = asset_prices_frame.index[lag+1]
@@ -60,7 +60,7 @@ class Strategy(object):
 
         for i in range(len(asset_prices_frame.index)-lag-2):
             time = asset_prices_frame.index[i+lag+2]
-            #print(start_date, time, end_date) # debug
+            # print(start_date, time, end_date) # debug
             if start_date < time < end_date:
                 self.apply_event_logic(time, ledger)
                 asset_prices = self.env.get_prices_close(time)

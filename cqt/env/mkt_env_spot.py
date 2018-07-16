@@ -44,15 +44,23 @@ class MktEnvSpot(MktEnvSec):
         # self.data.columns = self.target + '_' + self.data.columns
 
     def get_price_close(self, time=None):
-        if time is None:
-            return self.data['price_close']
+        if 'price_close' in self.data.columns:
+            price_close = 'price_close'
+        elif self.target + '_price_close' in self.data.columns:
+            price_close = self.target + '_price_close'
+        else:
+            error('Price close is not in the env section data.')
 
-        series = self.data['price_close']
+        if time is None:
+            return self.data[price_close]
+
+        series = self.data[price_close]
         series_trunc = series.truncate(after=time)
         return series_trunc.iloc[-1]
 
     def plot_price_close(self):
-        plt.plot(self.data.index, self.data['price_close'])
+        df = self.get_price_close()
+        plt.plot(df.index, df.values)
         plt.show()
 
     def get_log_return(self, time=None):
@@ -75,12 +83,13 @@ class MktEnvSpot(MktEnvSec):
             time_end = time
             time_start = time - timedelta(days=window_size)
 
+        df = self.get_price_close()
         if damping_factor is None:
-            ma_series = self.data['price_close'].truncate(before=time_start, after=time_end)
+            ma_series = df.truncate(before=time_start, after=time_end)
             ma_series = ma_series.rolling(window_size).mean()
             ma_series = ma_series.dropna()
         else:
-            series = self.data['price_close'].truncate(before=time_start, after=time_end)
+            series = df.truncate(before=time_start, after=time_end)
             series_size = len(series)
             if series_size < window_size:
                 error('The input series is shorter than the window size.')

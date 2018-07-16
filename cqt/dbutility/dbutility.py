@@ -4,6 +4,7 @@ sys.path.append('../')
 sys.path.append('/home/cqtrun/dailyRun/env0/bin/crypto_index')
 import cqt
 import cqt.datagen as dg
+import cqt.datagen.datagen as dtg
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -37,7 +38,11 @@ class IndexedDBObj(object):
         self.fromTime = self.data.key.sort_values().iloc[0]
         self.toTime = self.data.key.sort_values().iloc[-1]
 
-
+    def get_index_data(self):
+        request_dict = dict()
+        request_dict['type'] = self.type
+        request_dict['period'] = self.period
+        return dtg.IndexedData(self.source, request_dict, self.data)
 
 def error(msg):
     print(msg)
