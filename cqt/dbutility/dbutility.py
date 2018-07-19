@@ -3,8 +3,6 @@ import sys
 sys.path.append('../')
 sys.path.append('/home/cqtrun/dailyRun/env0/bin/crypto_index')
 import cqt
-import cqt.datagen as dg
-import cqt.datagen.datagen as dtg
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -38,11 +36,11 @@ class IndexedDBObj(object):
         self.fromTime = self.data.key.sort_values().iloc[0]
         self.toTime = self.data.key.sort_values().iloc[-1]
 
-    def get_index_data(self):
-        request_dict = dict()
-        request_dict['type'] = self.type
-        request_dict['period'] = self.period
-        return dtg.IndexedData(self.source, request_dict, self.data)
+    # def get_index_data(self):
+        # request_dict = dict()
+        # request_dict['type'] = self.type
+        # request_dict['period'] = self.period
+        # return dtg.IndexedData(self.source, request_dict, self.data)
 
 def error(msg):
     print(msg)
@@ -116,7 +114,16 @@ def dump_to_db(df, tbl_name, key_field='key',db_id = 'Amazon_RDS'):
     
     conn.close()
 
-
+def get_table_list(db_id = 'Amazon_RDS'):
+    url = getUrlFromCfg(db_cfg_file,db_id)
+    (conn, engine) = db_connect(url)
+    
+    sql_str = "SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE'"
+    df = pd.read_sql(sql_str,conn)
+    
+    return df
+    
+    
 def get_from_db(tbl_name,from_date='',to_date='',db_id = 'Amazon_RDS'):
     
     url = getUrlFromCfg(db_cfg_file,db_id)
