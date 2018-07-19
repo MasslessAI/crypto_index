@@ -52,6 +52,8 @@ def testPortfolioFactory(configSectionDict):
 
 def testEnvironmentFactory(configSectionDict):
     # for testing purpose, hard coding it for now
+    # TODO:
+    # make this function a actual factory that will create environemnt from AWS DB
     file_btc_eth = open('../data/pickle/model_btc_eth.pickle','rb')
     env_btc_eth = pickle.load(file_btc_eth)
     return env_btc_eth
@@ -122,10 +124,15 @@ def main():
     strategy = simpleMAStrategyFactory(myEnv, myPortfolio, mySignal)
     report = run_backtest(strategy, BACK_TEST_START_DATE)
     timestampStr = datetime.now().strftime('%Y%m%d.%H%M%S')
-    reportFileName = '.'.join(timestampStr, signalKey, 'csv')
+    logMsg = '|'.join([datetime.now().strftime('%Y%m%d.%H%M%S'), 'run_backtest has started'])
+    print(logMsg)
+    logMsg = '|'.join([datetime.now().strftime('%Y%m%d.%H%M%S'), 'back test start date', BACK_TEST_START_DATE]) 
+    print(logMsg)
+    reportFileName = '.'.join([timestampStr, signalKey, 'csv'])
     reportFilePath = os.path.join(PERFORMANCE_TRACKING_DIR, reportFileName)
     report.to_csv(reportFilePath, index=False)
-    print('|'.join(timestampStr, reportFilePath, 'done'))
+    logMsg ='|'.join([datetime.now().strftime('%Y%m%d.%H%M%S'), 'result file saved to', reportFilePath]) 
+    print(logMsg)
 
 
 if __name__ == '__main__':
