@@ -9,11 +9,15 @@ Instead, use the root account to create IAM accounts. These IAM accounts can be 
 
 Currently, the following accounts have been created using mark's root account, the default password will be distributed separately.
 
-ang_w
-aster_w
-lucas_g
-mark_z
-ming_q
+- ang_w
+
+- aster_w
+
+- lucas_g
+
+- mark_z
+
+- ming_q
 
 You will need to login via the following URL:
 
@@ -32,6 +36,7 @@ All of our processes should and will be run on an EC2 instance.
 ***2.a  Creating a Key-Pair***
 
 Follow the instructions in the below URL to create a key pair for you own IAM account:
+
 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html
 
 ***2.b  Connecting to a Instance***
@@ -50,7 +55,7 @@ First-time log in, you have to use the private key specified during instance cre
     
 		- obtain your public using your private key. This can be done using PuTTYgen. (start with ssh-rsa AAA....)
 		
-        - echo "ssh-rsa AAAA…" >> /home/ec2_user/.ssh/authorized_keys
+		- echo "ssh-rsa AAAA…" >> /home/ec2_user/.ssh/authorized_keys
 
 Later on, you will be able to use your own private key to log in to the instance. However, you will still need to use the default user (ec2-user) to log in.
 
@@ -60,12 +65,17 @@ After connecting to the instance, you will be ec2-user.
 
 From here, you can switch to another user. The following users have been created in this instance.
 
-mazhang
-cqtrun
-lucasgu
-angwei
-astwang
-zuqian
+- mazhang
+
+- cqtrun
+
+- lucasgu
+
+- angwei
+
+- astwang
+
+- zuqian
 
 Each of these account has their own home directory. eg /home/mazhang/
 
