@@ -18,8 +18,7 @@ class IndexedData(object):
 
     def __init__(self, source, request_dict, data):
         self.source = source
-        self.file_name = source + '_' + \
-            get_req_str(source, request_dict, False) + '_data'
+        self.file_name = get_req_str(source, request_dict, False)
         self.index = request_dict
         self.data = data
         self.validate()

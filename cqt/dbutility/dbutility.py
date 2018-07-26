@@ -3,6 +3,7 @@ import sys
 sys.path.append('../')
 sys.path.append('/home/cqtrun/dailyRun/env0/bin/crypto_index')
 import cqt
+import cqt.datagen as dg
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -32,18 +33,19 @@ class IndexedDBObj(object):
         self.symbol = tmp[2]
         self.period = tmp[3]
         self.setFromToDates()
-        self.data.rename(index=str, columns={
-                         'price_close': 'close', 'price_open': 'open', 'price_high': 'high', 'price_low': 'low'}, inplace=True)
+        # self.data.rename(index=str, columns={
+        #                  'price_close': 'close', 'price_open': 'open', 'price_high': 'high', 'price_low': 'low'}, inplace=True)
 
     def setFromToDates(self):
         self.fromTime = self.data.key.sort_values().iloc[0]
         self.toTime = self.data.key.sort_values().iloc[-1]
 
-    # def get_index_data(self):
-        # request_dict = dict()
-        # request_dict['type'] = self.type
-        # request_dict['period'] = self.period
-        # return dtg.IndexedData(self.source, request_dict, self.data)
+    def get_index_data(self):
+        request_dict = dict()
+        request_dict['request_type'] = self.type
+        request_dict['period'] = self.period
+        request_dict['symbol_id'] = self.symbol
+        return dg.IndexedData(self.source, request_dict, self.data)
 
 
 def error(msg):
