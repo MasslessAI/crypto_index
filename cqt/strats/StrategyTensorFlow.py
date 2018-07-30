@@ -33,7 +33,7 @@ import backtest as twp
 
 class StrategyTensorFlow(Strategy):
     #Take Action
-    def take_action(self, state, xdata, action, signal, time_step):
+    def take_action(self, state, xdata, action, signal, time_step,ledger):
         #this should generate a list of trade signals that at evaluation time are fed to the backtester
         #the backtester should get a list of trade signals and a list of price data for the assett
 
@@ -60,23 +60,26 @@ class StrategyTensorFlow(Strategy):
         #print(state)
         terminal_state = 0
         #print(signal)
-
+        time=self.prices.index[time_step-1]
+        self.apply_event_logic(time, ledger)
+                
         return state, time_step, signal, terminal_state
     
         #Get Reward, the reward is returned at the end of an episode
-    def get_reward(self,new_state, time_step, action, xdata, signal, terminal_state, eval=False, epoch=0):
+    def get_reward(self,new_state, time_step, action, xdata, signal, terminal_state, ledger,eval=False, epoch=0):
         reward = 0
         signal.fillna(value=0, inplace=True)
-
+        start_date = self.prices.index[time_step-1]
+        end_date = self.prices.index[time_step]
         if eval == False:
-            start_date = self.prices.index[time_step-1]
-            end_date = self.prices.index[time_step]
+            
             
             #==============
             #bt = twp.Backtest(pd.Series(data=[x for x in xdata[time_step-2:time_step]], index=signal[time_step-2:time_step].index.values), signal[time_step-2:time_step], signalType='shares')
             #reward = ((bt.data['price'].iloc[-1] - bt.data['price'].iloc[-2])*bt.data['shares'].iloc[-1])
             #==============
-            reward = self.back_testing(start_date, end_date)['pnl'].iloc[-1]
+            
+            reward = ledger.value(self.env.get_prices_close(end_date))-ledger.value(self.env.get_prices_close(start_date))
             #==============
             
             #print("debug "+ str(reward))
@@ -87,7 +90,8 @@ class StrategyTensorFlow(Strategy):
             #bt = twp.Backtest(pd.Series(data=[x for x in xdata], index=signal.index.values), signal, signalType='shares')
             #reward = bt.pnl.iloc[-1]
             #==============
-            reward = self.back_testing()['pnl'].iloc[-1]
+            asset_prices=self.env.get_prices_close(end_date);
+            reward = ledger.cash+ledger.wife_pocket+ledger.value(asset_prices)
             #==============
             
             print("debug final "+str(reward))
@@ -103,7 +107,7 @@ class StrategyTensorFlow(Strategy):
 
         return reward
     
-    def evaluate_Q(self,eval_data, eval_model, price_data, epoch=0):
+    def evaluate_Q(self,eval_data, eval_model, price_data, ledger,epoch=0):
         #This function is used to evaluate the performance of the system each epoch, without the influence of epsilon and random actions
         signal = pd.Series(index=np.arange(len(eval_data)))
         state, xdata, price_data = self.init_state(eval_data)
@@ -116,9 +120,9 @@ class StrategyTensorFlow(Strategy):
             qval = eval_model.predict(state, batch_size=1)
             action = (np.argmax(qval))
             #Take action, observe new state S'
-            new_state, time_step, signal, terminal_state = self.take_action(state, xdata, action, signal, time_step)
+            new_state, time_step, signal, terminal_state = self.take_action(state, xdata, action, signal, time_step,ledger)
             #Observe reward
-            eval_reward = self.get_reward(new_state, time_step, action, price_data, signal, terminal_state, eval=True, epoch=epoch)
+            eval_reward = self.get_reward(new_state, time_step, action, price_data, signal, terminal_state, ledger,eval=True, epoch=epoch)
             state = new_state
             if terminal_state == 1: #terminal state
                 status = 0
@@ -155,7 +159,7 @@ class StrategyTensorFlow(Strategy):
         indata = self.load_data()
         test_data = self.load_data(test=True)
         
-        epochs = 2
+        epochs = 10
         buffer = 200
         replay = []
         learning_progress = []
@@ -166,7 +170,21 @@ class StrategyTensorFlow(Strategy):
         batchSize = 100
         
         self.signal = pd.Series(index=np.arange(len(indata)))
+        
+        
+        
         for i in range(epochs):
+            
+            report_col = ['date', 'total', 'pnl', 'cash', 'set_aside']
+            for asset in self.env.get_targets():
+                report_col.append(asset + '_holding')
+                report_col.append(asset + '_price')
+
+            report = pd.DataFrame(columns=report_col)
+            asset_prices_frame = self.env.get_prices_close_frame()
+            ledger = Ledger(copy.deepcopy(self.initial.holdings), self.initial.cash)
+            self.signal = pd.Series(index=np.arange(len(indata)))
+            
             if i == epochs-1: #the last epoch, use test data set
                 indata = self.load_data(test=True)
                 state, xdata, price_data = self.init_state(indata, test=True)
@@ -186,9 +204,9 @@ class StrategyTensorFlow(Strategy):
                 else: #choose best action from Q(s,a) values
                     action = (np.argmax(qval))
                 #Take action, observe new state S'
-                new_state, time_step, signal, terminal_state = self.take_action(state, self.xdata, action, self.signal, time_step)
+                new_state, time_step, signal, terminal_state = self.take_action(state, self.xdata, action, self.signal, time_step,ledger)
                 #Observe reward
-                reward = self.get_reward(new_state, time_step, action, price_data, self.signal, terminal_state)
+                reward = self.get_reward(new_state, time_step, action, price_data, self.signal, terminal_state,ledger)
 
                 #Experience replay storage
                 if (len(replay) < buffer): #if buffer not filled, add to it
@@ -229,7 +247,7 @@ class StrategyTensorFlow(Strategy):
                 if terminal_state == 1: #if reached terminal state, update epoch status
                     status = 0
 
-            eval_reward = self.evaluate_Q(test_data, model, price_data, i)
+            eval_reward = self.evaluate_Q(test_data, model, price_data, ledger,i)
             learning_progress.append((eval_reward))
             print("Epoch #: %s Reward: %f Epsilon: %f" % (i,eval_reward, epsilon))
             #learning_progress.append((reward))
