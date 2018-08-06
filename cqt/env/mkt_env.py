@@ -106,3 +106,15 @@ class MktEnv(object):
 
         return stats
 
+    def sim_prices_close_frame(self, num_regimes=1, time_start=None, time_end=None):
+        price_frame = pd.DataFrame()
+        for target in self.model_dict.keys():
+            section = self.model_dict[target]
+            df = section.sim_price_close(num_regimes, time_start, time_end).to_frame().copy()
+            df.columns = [target + '_price_close_sim']
+            if len(price_frame) == 0:
+                price_frame = df
+            else:
+                price_frame = pd.merge(price_frame, df, left_index=True, right_index=True)
+
+        return price_frame
