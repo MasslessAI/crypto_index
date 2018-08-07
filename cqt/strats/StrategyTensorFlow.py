@@ -29,7 +29,6 @@ from sklearn.externals import joblib
 
 np.random.seed(1335)
 
-import backtest as twp
 
 class StrategyTensorFlow(Strategy):
     #Take Action
