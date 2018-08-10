@@ -24,9 +24,9 @@ class MktEnvSpot(MktEnvSec):
 
         if 'period_id' in self.data_info:
             if self.data_info['period_id'] == '1DAY':
-                self.data.index = self.data.index.dt.round('D')
+                self.data.index = self.data.index.round('D')
             elif self.data_info['period_id'] == '1HRS':
-                self.data.index = self.data.index.dt.round('H')
+                self.data.index = self.data.index.round('H')
             else:
                 pass
 
