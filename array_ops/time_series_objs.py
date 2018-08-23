@@ -89,7 +89,7 @@ class SpotSeries(Base1DSeries):
         return returnArray
     
     def getLogReturnArray(self, 
-                           liquidityHorizon=1): 
+                          liquidityHorizon=1): 
         returnArray = aop.getLogReturn(self.__dataValueArray,
                                        liquidityHorizon=liquidityHorizon)
         return returnArray
@@ -138,7 +138,7 @@ class SpotSeries(Base1DSeries):
         return aop.indicatorShorLongtWindowMean(self.__dataValueArray,
                                                 shortWindowWidth=shortWindowWidth,
                                                 longWindowWidth=longWindowWidth)
-        
+
 
 
 
