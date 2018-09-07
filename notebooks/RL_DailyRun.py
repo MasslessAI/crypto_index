@@ -23,7 +23,7 @@ import copy
 import cqt.strats.StrategyTensorFlow as stg_tf
 
 def main():
-    outDir = '/home/ec2-user/crypto_index/performance_tracking'
+    outDir = '/home/ec2-user/performance_tracking'
     TODAY = datetime.now()
     BACK_TEST_START_DATE = datetime(2018,1,1)
     tbl_name='coinapi-ohlcv-COINBASE_SPOT_BTC_USD-1DAY'
