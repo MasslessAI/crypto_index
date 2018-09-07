@@ -26,7 +26,7 @@ def main():
     outDir = '/home/ec2-user/crypto_index/performance_tracking'
     TODAY = datetime.now()
     BACK_TEST_START_DATE = datetime(2018,1,1)
-    tbl_name='coinapi-ohlcv-BINANCE_SPOT_BTC_USDT-1DAY'
+    tbl_name='coinapi-ohlcv-COINBASE_SPOT_BTC_USD-1DAY'
     df_btc=db.get_from_db(tbl_name,from_date='2017-10-01',to_date=TODAY.strftime('%Y-%M-%d'))
     config = {'asset_type': 'spot'}
     model_btc_eth = env.MktEnv([])
