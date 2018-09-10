@@ -1,0 +1,261 @@
+    1  ls -lrt
+    2  pwd
+    3  exit
+    4  bash
+    5  exit
+    6  bash
+    7  date --date='-1 month'
+    8  date --date='-[F month'
+    9  date +%Y-%m-%dT00:00:00 -d '3 days ago'
+   10  which date
+   11  date --version
+   12  date +%Y-%m-%dT00:00:00 -d 3 days ago
+   13  date +%Y-%m-%d
+   14  date +%Y%m%d
+   15  bash
+   16  ls
+   17  pwd
+   18  whoami
+   19  id
+   20  cd ~/.ssh
+   21  ls
+   22  cat authorized_keys 
+   23  useradd -d /home/mazhang -m -s shell -u mazhang mazhang
+   24  ls -lrt /usr/sbin/useradd
+   25  sudo -s
+   26  su mazhang
+   27  ls
+   28  cat authorized_keys
+   29  su mazhang
+   30  sudo -s
+   31  su cqtrun
+   32  sudo apt-get install git
+   33  sudo yam update
+   34  sudo yum update
+   35  sudo yum install git
+   36  git version
+   37  su cqtrun
+   38  cd ..
+   39  sudo yum search python
+   40  sudo yum search python3
+   41  sudo yum install python35
+   42  python version
+   43  python --version
+   44  python3 --version
+   45  which python3 
+   46  ls -lrt /usr/bin/python3
+   47  su cqtrun
+   48   pip --version
+   49  sudo yum python3-pip
+   50  sudo yum install python3-pip
+   51  sudo yum install python-pip
+   52  sudo yum install python35-pip
+   53  pip version
+   54  pip --version
+   55  which pip
+   56  ls -lrt /usr/bin/pip
+   57  ls -l /etc/alternatives/pip
+   58  rm /etc/alternatives/pip
+   59  sudo -s
+   60  ls
+   61  pip --version
+   62  pip install requests
+   63  sudo pip install requests
+   64  sudo pip install pandas
+   65  sudo pip install sqlalchemy
+   66  sudo pip install psycopg2
+   67  sudo pip update psycopg2
+   68  sudo pip upgrade psycopg2
+   69  psycopg2 --version
+   70  python3 -c "import psycopg2; print(psycopg2.__version__)"
+   71  python3 -c "import sqlalchemy; print(sqlalchemy.__version__)"
+   72  bash
+   73  su zuqian
+   74  cut -d: -f1 /etc/passwd
+   75  su mazhang
+   76  cd .ssh
+   77  ls
+   78  cat authorized_keys 
+   79  echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0x/gUmHrBoDnH0zt3B71/qsbzad0f0DCZdEKwE+/8leWn9b/wsx7kCvuUx/dVDgsiLLuRBIcj5gBV8ZBCmPSSs//5hsV/kvQNCl09Ch1L12DtIOZ4rFC1mPbL7N49XmFz60ZBpsEPf+/nIfh9LNR9sQEjqcfFPxSmBF+CqmXr9/uAXvG0NRCR5hLJCBS/zM/q/ehrQtJpQRB5l8GgWHNWSmKh5O36PtqBQ8qfO1xxUpbtyqBrNzz/3vx29pUz84i+rSloodNEPkZxpbf6y8vw7H1eSW4jHMBibVfLo/wx1NjA67j9JJQxlnrwnTfKI15bvMcgdMLyWXdWxT55ufc3 imported-openssh-key" >> authorized_keys 
+   80  cat authorized_keys 
+   81  su cqtrun
+   82  sudo -s
+   83  date
+   84  su cqtrun
+   85  sudo -s
+   86  bash
+   87  su cqtrun
+   88  bash
+   89  which python
+   90  which python3
+   91  ls
+   92  cd zuqian
+   93  su zuqian
+   94  su aster_w
+   95  su zuqian
+   96  sudo aster_w
+   97  su aster_w
+   98  ls
+   99  pwd
+  100  ls
+  101  su asterw
+  102  su astwang
+  103  sudo -s
+  104  su zuqian
+  105  ls
+  106  source Anaconda3-5.2.0-Linux-x86_64.sh 
+  107  bash Anaconda3-5.2.0-Linux-x86_64.sh 
+  108  su zuqian
+  109  which conda
+  110  cd ~
+  111  ls
+  112  which conda
+  113  cd anaconda3
+  114  ls
+  115  cd bin
+  116  ls
+  117  conda
+  118  cd ..
+  119  ls
+  120  su cqtrun
+  121  ls
+  122  ls -lrt
+  123  cd .ssh/
+  124  ls
+  125  cat authorized_keys 
+  126  su cqtrun
+  127  ls
+  128  id
+  129  vim authorized_keys 
+  130  cd ~
+  131  sudo -s
+  132  ls
+  133  cd .ssh
+  134  ls
+  135  cat authorized_keys 
+  136  su yuxigu
+  137  vim .jupyter/jupyter_notebook_config.py
+  138  exit
+  139  ls
+  140  sudo -iu astwang
+  141  ls
+  142  git clone https://github.com/MasslessAI/crypto_index.git
+  143  ls
+  144  cd crypto_index/
+  145  ls
+  146  cd notebooks/
+  147  ls
+  148  jupyter notebook 
+  149  which conda
+  150  sudo pip install jupyter-notebook
+  151  sudo pip install jupyter
+  152  jupyter notebook 
+  153  jupyter notebook --ip=0.0.0.0
+  154  LS
+  155  ls
+  156  cd ..
+  157  ls
+  158  cd ..
+  159  ls
+  160  cd anaconda3/
+  161  ls
+  162  cd ..
+  163  more .bashrc
+  164  which anaconda2
+  165  which anaconda3
+  166  vim .bashrc
+  167  more .bashrc
+  168  which python
+  169  python -version
+  170  python --version
+  171  which python /usr/bin/python
+  172  source .bashrc
+  173  python
+  174  python --version
+  175  ipython
+  176  jupyter notebook --generate-config
+  177  mkdir certs
+  178  cd certs
+  179  sudo openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout mycert.pem -out mycert.pem
+  180  ls
+  181  cd 
+  182  ls
+  183  ls -atl
+  184  vim .jupyter/jupyter_notebook_config.py
+  185  ls
+  186  cd crypto_index/notebooks/
+  187  jupyter notebook
+  188  jupyter notebook --no-browser --port=8888
+  189  history
+  190  jupyter notebook --no-browser --port=8888
+  191  ls
+  192  pip install keras==2.2 
+  193  pip show keras
+  194  pip install tensorflow
+  195  exit
+  196  pip install talib
+  197  sudo pip install ta-lib
+  198  pip show TA-lib
+  199  pip show ta-lib
+  200  pip
+  201  pip show Ta-lib
+  202  pip install TA-Lib
+  203  python
+  204  pip show talib
+  205  pip show numpy
+  206  python
+  207  pip install 
+  208  pip install TA-lib
+  209  python
+  210  exit
+  211  pip show keras
+  212  pip show tensorflow
+  213  pip show sklearn
+  214  pip install sklearn
+  215  yum group install "Development Tools"
+  216  sudo -s
+  217  ls
+  218  wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
+  219  tar -xzf ta-lib-0.4.0-src.tar.gz
+  220  cd ta-lib
+  221  ./configure --prefix=/usr
+  222  sudo make install
+  223  wget https://github.com/mrjbq7/ta-lib/archive/TA_Lib-0.4.10.tar.gz
+  224  tar -xzf TA_Lib-0.4.10.tar.gz
+  225  cd ta-lib-TA_Lib-0.4.10/
+  226  sudo python setup.py install
+  227  pip install numpy
+  228  ls
+  229  more setup.py
+  230  which python
+  231  cd ..
+  232  ls
+  233  cd ..
+  234  ls
+  235  uname -a
+  236  sudo apt-get install build-essential
+  237  sudo apt install build-essential
+  238  lsb_release -a
+  239  ls -atl
+  240  more .bashrc
+  241  more .bash_profile 
+  242  jupyter notebook --no-browser --port=8888
+  243  ls
+  244  cd crypto_index/
+  245  ls
+  246  cd data
+  247  ls
+  248  cd ..
+  249  cd notebooks/
+  250  cd ./data
+  251  mkdir data
+  252  ls
+  253  cd ./data
+  254  pwd
+  255  ls
+  256  history
+  257  .history>aster_deployment.txt
+  258  ls -atl
+  259  ls
+  260* 
+  261  history>aster_deployment.txt
