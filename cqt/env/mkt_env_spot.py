@@ -16,8 +16,8 @@ class MktEnvSpot(MktEnvSec):
 
         time_close = []
         for time in self.data.time_close:
-            time_close.append(datetime.strptime(time[:26], '%Y-%m-%dT%H:%M:%S.%f'))
-            # time_close.append(datetime.strptime(time[:10], '%Y-%m-%d'))
+            #time_close.append(datetime.strptime(time[:26], '%Y-%m-%dT%H:%M:%S.%f'))
+             time_close.append(datetime.strptime(time[:10], '%Y-%m-%d'))
 
         self.data.index = pd.to_datetime(time_close)
         self.data.index.name = 'time_close'
