@@ -32,7 +32,10 @@ class StrategyBBANDS(Strategy):
             self.prices = copy.deepcopy(self.asset_model.get_section(btc).data)
             self.prices.rename(columns={'price_open': 'open', 'price_high': 'high', 'price_low': 'low', 'price_close': 'close', 'volume_traded': 'volume'}, inplace=True)
             self.close = self.prices['close'].values
-            self.upper, self.middle, self.lower = talib.BBANDS(self.close, matype=MA_Type.T3)
+            self.upper=rules['nbdevup']
+            self.lower=rules['nbdevdn']
+            self.period=rules['timeperiod']
+            self.upper, self.middle, self.lower = talib.BBANDS(self.close, timeperiod=self.period, nbdevup=self.upper, nbdevdn=self.lower,matype=MA_Type.T3)
             self.signal=self.close*0
 
     def apply_event_logic(self, time, prtf):
