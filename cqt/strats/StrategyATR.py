@@ -29,13 +29,15 @@ class StrategyATR(Strategy):
         if self.asset_model.has_section(btc):
             self.prices = copy.deepcopy(self.asset_model.get_section(btc).data)
             self.prices.rename(columns={'price_open': 'open', 'price_high': 'high', 'price_low': 'low', 'price_close': 'close', 'volume_traded': 'volume'}, inplace=True)
-            self.close = self.prices['close'].values
-            self.sma = SMA(self.prices, timeperiod=14)
-            self.atr= ATR(self.prices, timeperiod=14)
-            self.signal=self.close*0
             self.upperbw=rules['bandwidth'][1]
             self.lowerbw=rules['bandwidth'][0]
-
+            self.smaperiod=rules['timeperiod'][0]
+            self.atrperiod=rules['timeperiod'][1]
+            self.close = self.prices['close'].values
+            self.sma = SMA(self.prices, timeperiod=self.smaperiod)
+            self.atr= ATR(self.prices, timeperiod=self.atrperiod)
+            self.signal=self.close*0
+            
     def apply_event_logic(self, time, prtf):
         btc = 'btc'
         if self.asset_model.has_section(btc):

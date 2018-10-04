@@ -77,7 +77,7 @@ def data_gen(source, request, keyList=None, write_to_file=False, sync_to_db=True
         df = pd.DataFrame()
         #df = df.append(json_str, ignore_index=True)
 
-        df = covert_data(source, df, json_str)
+        df = covert_data(source, df, json_str, request['period_id'])
 
         # for key in request:
         # df[key] = request[key]
@@ -192,21 +192,21 @@ def read_api_cfg(cfg_file):
     return cfg_data
 
 
-def covert_data(source, data, json_str):
+def covert_data(source, data, json_str, period='1DAY'):
 
     if source == "coinapi":
         data = data.append(json_str, ignore_index=True)
-        df_out = convert_coinapi_data(data)
+        df_out = convert_coinapi_data(data, period)
     elif source == "cryptocompare":
         data = data.append(json_str["Data"], ignore_index=True)
-        df_out = convert_cryptocompare_data(data)
+        df_out = convert_cryptocompare_data(data, period)
     elif source == "gdax":
         #data = data.append(json_str, ignore_index=True)
-        df_out = convert_gdax_data(json_str)
+        df_out = convert_gdax_data(json_str, period)
     return df_out
 
 
-def convert_coinapi_data(data_coinapi):
+def convert_coinapi_data(data_coinapi, period='1DAY'):
     conversion_map = {'price_close': 'price_close',
                       'price_open': 'price_open',
                       'price_high': 'price_high',
@@ -220,14 +220,14 @@ def convert_coinapi_data(data_coinapi):
     data_standard = pd.DataFrame()
     for key in conversion_map.keys():
         if key == 'key':
-            data_standard[key] = getDate(data_coinapi[conversion_map[key]])
+            data_standard[key] = getDate(data_coinapi[conversion_map[key]], period)
         else:
             data_standard[key] = data_coinapi[conversion_map[key]]
 
     return data_standard
 
 
-def convert_gdax_data(data_gdax):
+def convert_gdax_data(data_gdax,period='1DAY'):
     header = ['time', 'low', 'high', 'open', 'close', 'volumn']
     conversion_map = {'price_close': 'close',
                       'price_open': 'open',
@@ -245,7 +245,14 @@ def convert_gdax_data(data_gdax):
         if conversion_map[key] == 'time':
             tmp_val = date_unix_to_iso(tmp_df[conversion_map[key]])
             if key == 'key':
-                data_standard[key] = tmp_val.split('T')[0]
+                if period == '1DAY':
+                    data_standard[key] = tmp_val.split('T')[0]
+                elif period == '1HRS':
+                    data_standard[key] = tmp_val.split(':')[0] + ":00:00"
+                elif period == '1MIN':
+                    data_standard[key] = tmp_val.split(':')[0] + ":" + tmp_val.split(':')[1] + ":00"
+                elif period == '1SEC':
+                    data_standard[key] = tmp_val.split(':')[0] + ":" + tmp_val.split(':')[1] + tmp_val.split(':')[2]
             else:
                 data_standard[key] = tmp_val
         elif conversion_map[key] == 'na':
@@ -256,7 +263,7 @@ def convert_gdax_data(data_gdax):
     return data_standard
 
 
-def convert_cryptocompare_data(data_cc):
+def convert_cryptocompare_data(data_cc,period='1DAY'):
     conversion_map = {'price_close': 'close',
                       'price_open': 'open',
                       'price_high': 'high',
@@ -272,7 +279,14 @@ def convert_cryptocompare_data(data_cc):
         if conversion_map[key] == 'time':
             tmp_val = date_unix_to_iso(data_cc[conversion_map[key]])
             if key == 'key':
-                data_standard[key] = tmp_val.split('T')[0]
+                if period == '1DAY':
+                    data_standard[key] = tmp_val.split('T')[0]
+                elif period == '1HRS':
+                    data_standard[key] = tmp_val.split(':')[0] + ":00:00"
+                elif period == '1MIN':
+                    data_standard[key] = tmp_val.split(':')[0] + ":" + tmp_val.split(':')[1] + ":00"
+                elif period == '1SEC':
+                    data_standard[key] = tmp_val.split(':')[0] + ":" + tmp_val.split(':')[1] + tmp_val.split(':')[2]
             else:
                 data_standard[key] = tmp_val
         elif conversion_map[key] == 'na':
@@ -290,8 +304,15 @@ def date_unix_to_iso(df):
     return t
 
 
-def getDate(df):
+def getDate(df, period):
     t = deepcopy(df)
     for i in t.keys():
-        t[i] = df[i].split('T')[0]
+        if period == '1DAY':
+            t[i] = df[i].split('T')[0]
+        elif period == '1HRS':
+            t[i] = df[i].split(':')[0] + ":00:00"
+        elif period == '1MIN':
+            t[i] = df[i].split(':')[0] + ":" + df[i].split(':')[1] + ":00"
+        elif period == '1SEC':
+            t[i] = df[i].split(':')[0] + ":" + df[i].split(':')[1] + df[i].split(':')[2]
     return t
